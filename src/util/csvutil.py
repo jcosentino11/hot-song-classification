@@ -39,9 +39,9 @@ def isFloat(s):
 	except ValueError:
 		return False
 
-# cols must be in right-to-left order
 def remove_cols(cols, dataset):
-	for row in dataset:
-		for h in cols:
-			if h in HEADER:
-				del row[HEADER.index(h)]
+	for col in reversed(xrange(len(dataset[0]))):
+		if dataset[0][col] in cols:
+			for row in xrange(len(dataset)):
+				del dataset[row][col]
+	return dataset
