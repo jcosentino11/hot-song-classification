@@ -7,7 +7,40 @@ def append_header(dataset):
 	dataset.insert(0, HEADER)
 
 def write(dataset, path):
-	with open(path, 'wt') as f:
+	with open(path, 'w') as f:
 		writer = csv.writer(f, delimiter=',', quotechar='\'', quoting=csv.QUOTE_NONNUMERIC)
 		for row in dataset:
 			writer.writerow(row)
+
+def read(path):
+	dataset = []
+	with open(path, 'r') as f:
+		reader = csv.reader(f, delimiter=',', quotechar='\'', quoting=csv.QUOTE_MINIMAL)
+		for row in reader:
+			for i in xrange(len(row)):
+				if isInt(row[i]):
+					row[i] = int(row[i])
+				elif isFloat(row[i]):
+					row[i] = float(row[i])
+			dataset.append(row)
+	return dataset
+
+def isInt(s):
+	try:
+		int(s)
+		return True
+	except ValueError:
+		return False
+
+def isFloat(s):
+	try:
+		float(s)
+		return True
+	except ValueError:
+		return False
+
+# cols must be in right-to-left order
+def remove_cols(cols, dataset):
+	for row in dataset:
+		for h in cols:
+			del row[HEADER.index(h)]

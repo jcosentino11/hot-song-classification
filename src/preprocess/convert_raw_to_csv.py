@@ -31,16 +31,20 @@ def scrape_raw_dataset(path):
 	return dataset
 
 def scrape_dataset(name):
+	dataset = []
 	if name == 'test':
-		return scrape_raw_dataset(TEST_DIR)
+		dataset = scrape_raw_dataset(TEST_DIR)
 	elif name == 'training':
-		return scrape_raw_dataset(TRAINING_DIR)
+		dataset = scrape_raw_dataset(TRAINING_DIR)
+	csv.append_header(dataset)
+	return dataset
+
+def save_dataset(dataset, outfile):
+	csv.write(dataset, os.path.join(DATA_DIR, outfile))
 
 if __name__ == '__main__':
 	if len(sys.argv) != 3:
 		lg.log(lg.E, 'Usage: python convert_raw_to_csv.py <dataset> <outfile>')
 		sys.exit(1)
-	dataset = scrape_dataset(sys.argv[1])
-	csv.append_header(dataset)
 
-	csv.write(dataset, os.path.join(DATA_DIR, sys.argv[2]))
+	save_dataset(scrape_dataset(sys.argv[1]), sys.argv[2])	
