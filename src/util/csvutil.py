@@ -43,4 +43,5 @@ def isFloat(s):
 def remove_cols(cols, dataset):
 	for row in dataset:
 		for h in cols:
-			del row[HEADER.index(h)]
+			if h in HEADER:
+				del row[HEADER.index(h)]
