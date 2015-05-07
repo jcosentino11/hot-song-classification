@@ -1,4 +1,4 @@
-#Usage: python clean_csv.py <infile>
+#Usage: python clean_csv.py <infile> <outfile>
 
 import os
 import sys
@@ -10,16 +10,15 @@ COLS_TO_REMOVE = ['track_7digitalid', 'title', 'song_id', 'release', 'idx_simila
 
 DATA_DIR = '../../data'
 
-def remove_empty_cols(filename):
-	path = os.path.join(DATA_DIR, filename)
-	dataset = csv.read(path)
+def remove_empty_cols(infile, outfile):
+	dataset = csv.read(os.path.join(DATA_DIR, infile))
 	csv.remove_cols(COLS_TO_REMOVE, dataset)
-	csv.write(dataset, path)
+	csv.write(dataset, os.path.join(DATA_DIR, outfile))
 
 
 if __name__ == '__main__':
-	if len(sys.argv) != 2:
-		lg.log(lg.E, 'Usage: python clean_csv.py <infile>')
+	if len(sys.argv) != 3:
+		lg.log(lg.E, 'Usage: python clean_csv.py <infile> <outfile>')
 		sys.exit(1)
 
-	remove_empty_cols(sys.argv[1])
+	remove_empty_cols(sys.argv[1], sys.argv[2])
