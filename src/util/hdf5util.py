@@ -1,5 +1,4 @@
 import h5py
-import numpy as np
 
 def print_attrs(f):
 	f.visititems(__hdf5_print_attrs)

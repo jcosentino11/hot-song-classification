@@ -1,8 +1,13 @@
 #!/bin/bash
+cd ./src/train
 
-SIZES="1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30"
+SIZES="1 2 3 4 5 6 7 8 9 10"
 
 for size in $SIZES
 do
-	sh ./train_and_analyze.sh $size
+	python random_forest.py training.csv test.csv forestpred.csv $size
+	cd ./../analyze
+	echo "Size: $size"
+	python mse.py test.csv forestpred.csv forestresults.txt
+	cd ./../train
 done

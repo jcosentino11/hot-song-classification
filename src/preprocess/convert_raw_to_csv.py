@@ -3,7 +3,6 @@
 import os
 import sys
 sys.path.insert(0, '../util')
-import logger as lg
 import hdf5util as hdf5
 import csvutil as csv
 
@@ -23,10 +22,8 @@ def scrape_raw_dataset(path):
 	for root, dirs, files in os.walk(path):
 		for filename in files:
 			if '.h5' in filename:
-				lg.log(lg.V, 'Reading from %s' % filename)
 				f = load_data_file(os.path.join(root, filename))
 				row = scrape_data_file(f)
-				lg.log(lg.V, row) 
 				dataset.append(row)
 	return dataset
 
@@ -39,12 +36,10 @@ def scrape_dataset(name):
 	csv.append_header(dataset)
 	return dataset
 
-def save_dataset(dataset, outfile):
-	csv.write(dataset, os.path.join(DATA_DIR, outfile))
-
 if __name__ == '__main__':
 	if len(sys.argv) != 3:
-		lg.log(lg.E, 'Usage: python convert_raw_to_csv.py <dataset> <outfile>')
+		print('Usage: python convert_raw_to_csv.py <dataset> <outfile>')
 		sys.exit(1)
 
-	save_dataset(scrape_dataset(sys.argv[1]), sys.argv[2])	
+	dataset = scrape_dataset(sys.argv[1])
+	csv.write(dataset, os.path.join(DATA_DIR, sys.argv[2]))	

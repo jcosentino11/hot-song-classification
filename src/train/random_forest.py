@@ -1,60 +1,46 @@
 # Usage: python random_forest.py <trainingset> <testset> <outfile> <numtrees>
 
 from sklearn.ensemble import RandomForestClassifier
+import copy
 import os
 import sys
 sys.path.insert(0, '../util')
-import logger as lg
-import csvutil as csv
-from numpy import savetxt
+from dm import DatasetManager
 
 DATA_DIR = '../../data'
-removed_header = []
-
-def load_data_from_csv(infile):
-	return csv.read(os.path.join(DATA_DIR, infile))
-
-def load_dataset(infile):
-	dataset = load_data_from_csv(infile)
-	remove_header(dataset)
-	return dataset
-
-def save_data_to_csv(dataset, outfile):
-	csv.write(dataset, os.path.join(DATA_DIR, outfile))
-
-def remove_header(dataset):
-	global removed_header
-	removed_header = dataset.pop(0)
-
-def restore_header(dataset):
-	if len(removed_header) > 0:
-		dataset.insert(0, removed_header)
-	return dataset
 
 if __name__ == '__main__':
 	if len(sys.argv) != 5:
-		lg.log(lg.E, 'Usage: python random_forest.py <trainingset> <testset> <outfile> <numtrees>')
+		print('Usage: python random_forest.py <trainingset> <testset> <outfile> <numtrees>')
 		sys.exit(1)
 
-	trainingset = load_dataset(sys.argv[1])
-	testset = load_dataset(sys.argv[2])
+	# setup file paths
+	trainingpath = os.path.join(DATA_DIR, sys.argv[1])
+	testpath = os.path.join(DATA_DIR, sys.argv[2])
+	resultpath = os.path.join(DATA_DIR, sys.argv[3])
 
-	targetindex = len(trainingset[0]) - 1
+	# create managers and load datasets
+	traindm = DatasetManager(inpath=trainingpath)
+	traindm.load().remove_header()
+	testdm = DatasetManager(inpath=testpath)
+	testdm.load().remove_header()
 
-	target = [x[targetindex] for x in trainingset]
-	train = [x[0:targetindex] for x in trainingset]
+	# isolate target col from training set
+	targetindex = len(traindm.dataset[0]) - 1
+	target = [x[targetindex] for x in traindm.dataset]
+	train = [x[0:targetindex] for x in traindm.dataset]
 
-	rf = RandomForestClassifier(n_estimators=int(sys.argv[4]))
+	# build the forest
+	rf = RandomForestClassifier(n_estimators=int(sys.argv[4]), random_state=1)
 	rf.fit(train, target)
 
-	testset = [x[:-1] for x in testset]
-	resultset = rf.predict(testset)
+	# make predictions on test set
+	testdm.remove_col_by_index(-1)
+	results = rf.predict(testdm.dataset)
 
-	for i in xrange(len(testset)):
-		testset[i].append(resultset[i])
-	testset = restore_header(testset)
-	save_data_to_csv(testset, sys.argv[3])
-
-	# savetxt(os.path.join(DATA_DIR, sys.argv[3]), , delimiter=',', fmt='%f')
-
-	
+	# save results to disk
+	result = DatasetManager.from_dm(testdm)
+	result.append_col(results)
+	result.restore_header()
+	result.outpath = resultpath
+	result.save()

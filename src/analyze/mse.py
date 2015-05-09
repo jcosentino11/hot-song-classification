@@ -3,7 +3,6 @@
 import os
 import sys
 sys.path.insert(0, '../util')
-import logger as lg
 import csvutil as csv
 
 DATA_DIR = '../../data'
@@ -19,7 +18,7 @@ def mse(y, yhat):
 
 if __name__ == '__main__':
 	if len(sys.argv) != 4:
-		lg.log(lg.E, 'Usage: mse.py <testset> <predictionset> <outfile>')
+		print('Usage: mse.py <testset> <predictionset> <outfile>')
 		sys.exit(1)
 
 	testset = load_data_from_csv(sys.argv[1])
