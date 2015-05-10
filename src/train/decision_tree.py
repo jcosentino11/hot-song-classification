@@ -1,9 +1,9 @@
-# Usage: python random_forest.py <trainingset> <testset> <outfile> <numtrees>
+# Usage: python decision_tree.py <trainingset> <testset> <outfile> <viz>
 
 import os
 import sys
 
-from sklearn.ensemble import RandomForestClassifier
+from sklearn import tree
 
 sys.path.insert(0, '../util')
 from dm import DatasetManager
@@ -11,14 +11,15 @@ from dm import DatasetManager
 DATA_DIR = '../../data'
 
 if __name__ == '__main__':
-	if len(sys.argv) != 5:
-		print('Usage: python random_forest.py <trainingset> <testset> <outfile> <numtrees>')
+	if len(sys.argv) < 4:
+		print('Usage: python decision_tree.py <trainingset> <testset> <outfile> <viz>')
 		sys.exit(1)
 
 	# setup file paths
 	trainingpath = os.path.join(DATA_DIR, sys.argv[1])
 	testpath = os.path.join(DATA_DIR, sys.argv[2])
 	resultpath = os.path.join(DATA_DIR, sys.argv[3])
+	featpath = os.path.join(DATA_DIR, 'tree/importances.csv')
 
 	# create managers and load datasets
 	traindm = DatasetManager(inpath=trainingpath)
@@ -31,13 +32,16 @@ if __name__ == '__main__':
 	target = [x[targetindex] for x in traindm.dataset]
 	train = [x[0:targetindex] for x in traindm.dataset]
 
-	# build the forest
-	rf = RandomForestClassifier(n_estimators=int(sys.argv[4]))
-	rf.fit(train, target)
+	# build the tree
+	dt = tree.DecisionTreeClassifier()
+	dt.fit(train, target)
+
+	# print tree info
+	print("num classes: %d" % dt.n_classes_)
 
 	# make predictions on test set
 	testdm.remove_col_by_index(-1)
-	results = rf.predict(testdm.dataset)
+	results = dt.predict(testdm.dataset)
 
 	# save results to disk
 	result = DatasetManager.from_dm(testdm)
@@ -45,3 +49,15 @@ if __name__ == '__main__':
 	result.restore_header()
 	result.outpath = resultpath
 	result.save()
+
+	# save feat importance to disk
+	feat = []
+	feat.append(result.dataset[0])
+	feat.append(dt.feature_importances_)
+	featdm = DatasetManager.from_dataset(feat)
+	featdm.outpath = featpath
+	featdm.save()
+
+	# generate visualization
+	if len(sys.argv) == 5:
+		tree.export_graphviz(dt, out_file='./../../data/tree/tree.dot')

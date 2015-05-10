@@ -1,13 +1,11 @@
 #!/bin/bash
-cd ./src/train
-
-SIZES="1 2 3 4 5 6 7 8 9 10"
-
-for size in $SIZES
+echo "Starting Forest Benchmark"
+cd ./src/train/
+for ((i=1; i<=50; i++))
 do
-	python random_forest.py training.csv test.csv forestpred.csv $size
+	python random_forest.py training.csv test.csv forest/forestpred.csv 1
 	cd ./../analyze
-	echo "Size: $size"
-	python mse.py test.csv forestpred.csv forestresults.txt
+	echo "Size: 1"
+	python mse.py test.csv forest/forestpred.csv forest/forestresults.txt
 	cd ./../train
 done
